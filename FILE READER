@@ -1,0 +1,28 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+
+public class ReadFile {
+    public ReadFile() {
+    }
+
+    public String[] readMethod(String path) {
+        String fileName = path;
+        ArrayList<String> list = new ArrayList();
+        String line = "";
+
+        try {
+            BufferedReader in = new BufferedReader(new FileReader(fileName));
+
+            while((line = in.readLine()) != null) {
+                list.add(line);
+            }
+
+            in.close();
+        } catch (IOException var6) {
+            var6.printStackTrace();
+        }
+
+        return (String[])list.toArray(new String[0]);
+    }
