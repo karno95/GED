@@ -1,0 +1,217 @@
+import java.util.ArrayList;
+import java.util.List;
+
+public class DistanceCalculator {
+	
+    public int levenshteinDistance(String sRow, String sCol, int[]params)
+    {
+    	int rLen = sRow.length();
+    	int cLen = sCol.length();
+    	char[] rStr = sRow.toCharArray();
+    	char[] cStr = sCol.toCharArray();
+    	
+    	int RowIdx, ColIdx;
+    	char Row_i;
+    	char Col_j;
+    	int cost;
+    	
+    	if (rLen == 0)
+    		return cLen * params[2];
+    	if (cLen == 0)
+    		return rLen * params[3];
+    	
+    	int[] v0 = new int[rLen + 1];
+    	int[] v1 = new int[rLen + 1];
+    	v0[0] = 0;
+    	
+    	for (RowIdx = 0; RowIdx <= rLen; RowIdx++) {
+    		v0[RowIdx] = RowIdx * params[1];
+    	}
+    	
+    	for (ColIdx=1; ColIdx<= cLen; ColIdx++)
+    	{
+    		v1[0] = ColIdx * params[2];
+    	    Col_j = cStr[ColIdx-1];
+    	    
+    	    for (RowIdx = 1; RowIdx <= rLen; RowIdx++)
+    	    {
+    	    	Row_i = rStr[RowIdx-1];
+    	    	if (Col_j == Row_i)
+    	    		cost = params[0];
+    	    	else 
+    	    		cost = params[3];
+    	    	
+    	    	v1[RowIdx] = min(
+    	    			v0[RowIdx -1] + cost,
+    	    			v1[RowIdx -1] + params[1],
+    	    			v0[RowIdx] + params[2]
+    	    			);
+    	    }
+
+    	    for (int i=0; i<=rLen; i++)
+    	    	v0[i] = v1[i];   	    
+    	}
+    	
+    	return v1[rLen];
+    	
+    }
+    
+    int max(int a, int b, int c)
+    {
+    	int temp=a;
+    	if (temp < b)
+    		temp = b;
+    	if (temp < c)
+    		temp = c;
+    	return temp;
+    }
+    
+    int min(int a, int b, int c) 
+    {
+    	int temp = a;
+    	if (temp > b)
+    		temp = b;
+    	if (temp > c)
+    		temp = c;
+        return temp;
+    }
+    public int[] findMatch(String[]training, String[]test, String[]dicts, int[]params)
+    {
+    	int[] statics = new int[2];
+        int count = 0;
+        int numOfMatch = 0;
+        int result = 0;
+        int temp;
+        ArrayList<String> resultList = new ArrayList<String>();
+        //System.out.println("*:" + training.length);
+        for (int i = 0; i < training.length; i++)
+        {
+        	resultList.clear();
+        	result = 10000000;
+        	for (int j = 0; j < dicts.length; j++ )
+        	{
+        		temp = levenshteinDistance(dicts[j], training[i], params);
+
+
+        		if (result > temp)
+        		{
+        			result = temp;
+        			resultList.clear();
+        			if (temp % 10 != 0)
+        			    resultList.add(dicts[j]);
+        		}
+        		
+        		else if (result == temp) {
+        			if (temp % 10 != 0)
+        			    resultList.add(dicts[j]);
+        		}
+        			
+        	}
+        	if (!resultList.isEmpty()) {
+        		if (resultList.contains(test[i]))
+            	{	        		
+            		count++;
+            	}
+        		numOfMatch += resultList.size();
+        	}
+        	
+    		
+        }
+       
+        statics[0] = count;
+        statics[1] = numOfMatch;
+        return statics;
+    }
+    private static Object[] splitAry(String[] ary, int subSize) 
+    {
+    	  int count = ary.length % subSize == 0 ? ary.length / subSize: ary.length / subSize + 1;
+    	  
+    	  List<List<String>> subAryList = new ArrayList<List<String>>();
+    	 
+    	  for (int i = 0; i < count; i++) {
+    	   int index = i * subSize;
+    	   
+    	   List<String> list = new ArrayList<String>();
+    	   int j = 0;
+    	   while (j < subSize && index < ary.length) {
+    	    list.add(ary[index++]);
+    	    j++;
+    	   }
+    	 
+    	   subAryList.add(list);
+    	  }
+    	  
+    	  Object[] subAry = new Object[subAryList.size()];
+    	  
+    	  for(int i = 0; i < subAryList.size(); i++){
+    	   List<String> subList = subAryList.get(i);
+    	   
+    	   String[] subAryItem = new String[subList.size()];
+    	   for(int j = 0; j < subList.size(); j++){
+    		    subAryItem[j] = subList.get(j);
+    		   }
+    		   
+    		   subAry[i] = subAryItem;
+    		  }
+    		  
+    		  return subAry;
+    }
+    public String[] getSplitedArray(String[] originalAry, int num, int rank)
+    {
+    	Object[] subAry = splitAry(originalAry, num);
+    	
+    	String[] aAry = (String[]) subAry[rank];
+    	//System.out.println("*" + aAry.length);
+    	return aAry;
+    }
+    
+    public static void main(String[] args)
+    {
+    	int[] result = new int[2];
+    	//{m, i, d, r}
+    	int[] params = {0, 1, 10, 10	};
+    	DistanceCalculator dc = new DistanceCalculator();
+        ReadFile rf = new ReadFile();
+        String[] training = rf.readMethod("/Users/zhuyinghao/Desktop/seminar2/KT/Assignment1/data/wiki_misspell.txt");
+        String[] test = rf.readMethod("/Users/zhuyinghao/Desktop/seminar2/KT/Assignment1/data/wiki_correct.txt");
+        String[] dicts = rf.readMethod("/Users/zhuyinghao/Desktop/seminar2/KT/Assignment1/data/dict.txt");
+        
+        int splitsize = training.length/4;
+        
+        MyThread thread1 = new MyThread(dc.getSplitedArray(training, splitsize, 0),
+        		dc.getSplitedArray(test, splitsize, 0), dicts, params);
+        MyThread thread2 = new MyThread(dc.getSplitedArray(training, splitsize, 1), 
+        		dc.getSplitedArray(test, splitsize, 1), dicts, params);
+        MyThread thread3 = new MyThread(dc.getSplitedArray(training, splitsize, 2), 
+        		dc.getSplitedArray(test, splitsize, 2), dicts, params);
+        MyThread thread4 = new MyThread(dc.getSplitedArray(training, splitsize, 3), 
+        		dc.getSplitedArray(test, splitsize, 3), dicts, params);
+        MyThread thread5 = new MyThread(dc.getSplitedArray(training, splitsize, 4),
+        		dc.getSplitedArray(test, splitsize, 4), dicts, params);
+        
+        thread1.start();
+        thread2.start();
+        thread3.start();
+        thread4.start();
+        thread5.start();
+        
+        try {
+	        thread1.join();
+	        thread2.join();
+	        thread3.join();
+	        thread4.join();
+	        thread5.join();
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+        
+        result[0] = thread1.getResult()[0] + thread2.getResult()[0] 
+        		+ thread3.getResult()[0] + thread4.getResult()[0]+ thread5.getResult()[0];
+        result[1] = thread1.getResult()[1] + thread2.getResult()[1] 
+        		+ thread3.getResult()[1] + thread4.getResult()[1]+ thread5.getResult()[1];
+        
+        
+        System.out.println("Result: " + result[0] + "*" + result[1]);
+    }
+}
+
