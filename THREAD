@@ -45,3 +45,52 @@ public class MyThread extends Thread {
         this.test = test;
     }
 }
+public class MyThread extends Thread {
+    private int[] result = new int[2];
+    private String[] test;
+    private String[] dicts;
+    private String[] training;
+    private int[] params;
+    
+    public MyThread(String[] training, String[] test, String[] dict, int[] params) {
+    	this.setTest(test);
+    	this.setDict(dict);
+    	this.setTraining(training);
+    	this.params = params;
+    }
+    
+    @Override 
+    public void run() {
+    	DistanceCalculator dc = new DistanceCalculator();
+    	result = dc.findMatch(training, test, dicts, params);
+    }
+    
+    public int[] getResult()
+    {
+    	return this.result;
+    }
+
+	public String[] getTraining() {
+		return training;
+	}
+
+	public void setTraining(String[] training) {
+		this.training = training;
+	}
+
+	public String[] getDict() {
+		return dicts;
+	}
+
+	public void setDict(String[] dicts) {
+		this.dicts = dicts;
+	}
+
+	public String[] getTest() {
+		return test;
+	}
+
+	public void setTest(String[] test) {
+		this.test = test;
+	}
+}
