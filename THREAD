@@ -1,0 +1,47 @@
+public class MyThread extends Thread {
+    private int[] result = new int[2];
+    private String[] test;
+    private String[] dicts;
+    private String[] training;
+    private int[] params;
+
+    public MyThread(String[] training, String[] test, String[] dict, int[] params) {
+        this.setTest(test);
+        this.setDict(dict);
+        this.setTraining(training);
+        this.params = params;
+    }
+
+    public void run() {
+        DistanceCalculator dc = new DistanceCalculator();
+        this.result = dc.findMatch(this.training, this.test, this.dicts, this.params);
+    }
+
+    public int[] getResult() {
+        return this.result;
+    }
+
+    public String[] getTraining() {
+        return this.training;
+    }
+
+    public void setTraining(String[] training) {
+        this.training = training;
+    }
+
+    public String[] getDict() {
+        return this.dicts;
+    }
+
+    public void setDict(String[] dicts) {
+        this.dicts = dicts;
+    }
+
+    public String[] getTest() {
+        return this.test;
+    }
+
+    public void setTest(String[] test) {
+        this.test = test;
+    }
+}
